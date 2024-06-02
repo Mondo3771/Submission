@@ -1,5 +1,5 @@
 #!/bin/bash
-# ./run.sh <number_of_elements> <number_of_threads> <number_of_runs>
+# ./run.sh <number_of_elements> <number_of_threads> <number_of_runs> <number_of_processes>
 echo "We will be runnig each algorithm $3 times with 2^$1 elements "
 
 echo "--------------------------------------------------------------------------------------------------------"
@@ -12,6 +12,6 @@ echo "Running bitonic_sort_openmp..."
 echo "--------------------------------------------------------------------------------------------------------"
  
 echo "Running bitonic_sort_mpi..."
-mpiexec -n 4 ./bitonic_mpi $1 $3
+mpiexec -n $4 ./bitonic_mpi $1 
 echo "--------------------------------------------------------------------------------------------------------"
  

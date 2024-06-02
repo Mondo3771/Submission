@@ -140,6 +140,25 @@ calling my recursive bitonicMerge function.
     \label{table:2}
 \end{table}
 \section{Correctness and Performance Analysis}
+For Correctness I just checked if the array was sorted in ascending order using the IsSorted function i made.
+Below is a Table of the time taken for the baseline algorithm, Bitonic Sort in Serial and the parallel implementations: Note that the baseline is run in each of the parallel implementations to get a fair comparison.Therefore Quicksort sorts the same array as the parallel implementation and that i will be runnig OpenMP with 16 threads and MPI with 4 processes.
+\begin{table}[ht]
+    \centering
+    \setlength{\tabcolsep}{10pt} % Add padding
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        \textbf{Algorithm} & \textbf{Time Taken} & \textbf{Speedup} & \textbf{Correctness} \\
+        \hline
+        Baseline            & 15.646154          & 1.0             & True                 \\
+        Bitonic Sort Serial & 14.018849          & 1.116            & True                 \\
+        Bitonic Sort OPENMP & 4.599116           & 3.405            & True                 \\
+        Bitonic Sort MPI    & 8.764265           & 1.785            & True                 \\
+        \hline
+    \end{tabular}
+    \caption{Time Taken, Speedup and Correctness}
+    \label{table:3} 
+\end{table}
+
 
 \section{Conclusion}
 \end{document}

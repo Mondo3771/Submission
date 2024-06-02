@@ -112,7 +112,6 @@ void bitonicSort_Seq(int a[], int low, int cnt, bool dir)
 
 void recursiveBitonic(int a[], int low, int cnt, int s, int dir)
 {
-
     if (s > 1)
     {
         int half = cnt / 2;
@@ -140,23 +139,24 @@ void bitonicSort(int a[], int low, int cnt, bool dir, int rank, int s)
     MPI_Gather(recv, cnt / s, MPI_INT, a, cnt / s, MPI_INT, 0, MPI_COMM_WORLD);
     if (rank == 0)
     {
+        // this is for 8 processors
         recursiveBitonic(a, 0, cnt, s, dir);
     }
 }
 
 int main(int argc, char *argv[])
 {
-    MPI_Init(&argc, &argv);
-    int rank;
-    int s;
-    int *arr_MPI, *arr_serial, *array;
-    int n;
-    MPI_Comm_size(MPI_COMM_WORLD, &s);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    int num_runs = atoi(argv[2]);
-    for (int k = 0; k < num_runs; k++)
-    {
+    // int num_runs = atoi(argv[2]);
+    // for (int k = 0; k < num_runs; k++)
+    // {
 
+        MPI_Init(&argc, &argv);
+        int rank;
+        int s;
+        int *arr_MPI;
+        int n;
+        MPI_Comm_size(MPI_COMM_WORLD, &s);
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
         if (rank != 0)
         {
             bitonicSort(arr_MPI, 0, n, 1, rank, s);
@@ -165,9 +165,9 @@ int main(int argc, char *argv[])
         {
             int p = atoi(argv[1]);
             int size = pow(2, p);
-            arr_serial = (int *)malloc(size * sizeof(int));
+            int *arr_serial = (int *)malloc(size * sizeof(int));
             arr_MPI = (int *)malloc(size * sizeof(int));
-            array = (int *)malloc(size * sizeof(int));
+            int *array = (int *)malloc(size * sizeof(int));
             int n = size;
             double q_time;
             if (arr_serial == NULL || arr_MPI == NULL)
@@ -199,11 +199,12 @@ int main(int argc, char *argv[])
             isSorted(arr_MPI, n) ? printf("Sorted\n") : printf("Not Sorted\n");
             printf("Speedup: %f\n", q_time / total_time);
             printf("\n");
+            free(arr_MPI);
+            free(arr_serial);
+            free(array);
         }
-        free(arr_MPI);
-        free(arr_serial);
-        free(array);
-    }
-    MPI_Finalize();
+        MPI_Finalize();
+    // }
+
     return 0;
 }
