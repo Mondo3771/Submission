@@ -115,10 +115,6 @@ void recursiveBitonic(int a[], int low, int cnt, int s, int dir)
 
     if (s > 1)
     {
-        int *recv = (int *)malloc(2 * cnt / s * sizeof(int));
-        MPI_Scatter(a, cnt / s, MPI_INT, recv, cnt / s, MPI_INT, 0, MPI_COMM_WORLD);
-        bitonicMerge_Seq(recv, 0, cnt / s, dir);
-        MPI_Gather(recv, cnt / s, MPI_INT, a, cnt / s, MPI_INT, 0, MPI_COMM_WORLD);
         int half = cnt / 2;
         int half_s = s / 2;
         recursiveBitonic(a, low, half, half_s, 1);
@@ -153,52 +149,57 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     int rank;
     int s;
-    int *arr_MPI;
+    int *arr_MPI, *arr_serial, *array;
     int n;
     MPI_Comm_size(MPI_COMM_WORLD, &s);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    if (rank != 0)
+    int num_runs = atoi(argv[2]);
+    for (int k = 0; k < num_runs; k++)
     {
-        bitonicSort(arr_MPI, 0, n, 1, rank, s);
-    }
-    else
-    {
-        int p = atoi(argv[1]);
-        int size = pow(2, p);
-        int *arr_serial = (int *)malloc(size * sizeof(int));
-        arr_MPI = (int *)malloc(size * sizeof(int));
-        int *array = (int *)malloc(size * sizeof(int));
-        int n = size;
-        double q_time;
-        if (arr_serial == NULL || arr_MPI == NULL)
+
+        if (rank != 0)
         {
-            fprintf(stderr, "Memory allocation failed\n");
-            exit(1);
+            bitonicSort(arr_MPI, 0, n, 1, rank, s);
         }
-        srand(time(0));
-        for (int i = 0; i < size; i++)
+        else
         {
-            array[i] = rand() % size + 1;
-            arr_serial[i] = array[i];
-            arr_MPI[i] = array[i];
+            int p = atoi(argv[1]);
+            int size = pow(2, p);
+            arr_serial = (int *)malloc(size * sizeof(int));
+            arr_MPI = (int *)malloc(size * sizeof(int));
+            array = (int *)malloc(size * sizeof(int));
+            int n = size;
+            double q_time;
+            if (arr_serial == NULL || arr_MPI == NULL)
+            {
+                fprintf(stderr, "Memory allocation failed\n");
+                exit(1);
+            }
+            srand(time(0));
+            for (int i = 0; i < size; i++)
+            {
+                array[i] = rand() % size + 1;
+                arr_serial[i] = array[i];
+                arr_MPI[i] = array[i];
+            }
+            double start, end;
+            start = MPI_Wtime();
+            quickSort(arr_serial, 0, n);
+            end = MPI_Wtime();
+            double total_time = end - start;
+            q_time = total_time;
+            printf("Time taken by Serial: %f\n", total_time);
+            isSorted(arr_serial, n) ? printf("Sorted\n") : printf("Not Sorted\n");
+            start, end;
+            start = MPI_Wtime();
+            bitonicSort(arr_MPI, 0, n, 1, rank, s);
+            end = MPI_Wtime();
+            total_time = end - start;
+            printf("Time taken by MPI: %f\n", total_time);
+            isSorted(arr_MPI, n) ? printf("Sorted\n") : printf("Not Sorted\n");
+            printf("Speedup: %f\n", q_time / total_time);
+            printf("\n");
         }
-        double start, end;
-        start = MPI_Wtime();
-        quickSort(arr_serial, 0, n);
-        end = MPI_Wtime();
-        double total_time = end - start;
-        q_time = total_time;
-        printf("Time taken by Serial: %f\n", total_time);
-        isSorted(arr_serial, n) ? printf("Sorted\n") : printf("Not Sorted\n");
-        start, end;
-        start = MPI_Wtime();
-        bitonicSort(arr_MPI, 0, n, 1, rank, s);
-        end = MPI_Wtime();
-        total_time = end - start;
-        printf("Time taken by MPI: %f\n", total_time);
-        isSorted(arr_MPI, n) ? printf("Sorted\n") : printf("Not Sorted\n");
-        printf("Speedup: %f\n", q_time / total_time);
-        printf("\n");
         free(arr_MPI);
         free(arr_serial);
         free(array);
