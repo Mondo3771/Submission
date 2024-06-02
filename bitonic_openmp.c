@@ -156,72 +156,66 @@ int main(int argc, char *argv[])
 	int num_runs = atoi(argv[3]);
 	// num_runs= 1;
 	//  this is just creating the array i am going to sort
-	int threads[8] = {2, 4, 8, 16, 32, 64,128,256};
-	for (int k = 0; k < 8; k++)
+
+	for (int j = 0; j < num_runs; j++)
 	{
-		for (int j = 0; j < num_runs; j++)
+		for (int i = 0; i < size; i++)
 		{
-			for (int i = 0; i < size; i++)
-			{
-				array[i] = rand() % size + 1;
-				arr_serial[i] = array[i];
-				arr_Open_mp[i] = arr_serial[i];
-			}
-
-			for (int i = 0; i < n; i++)
-			{
-				arr_serial[i] = array[i];
-			}
-			start = omp_get_wtime();
-			quickSort(arr_serial, 0, n - 1);
-			end = omp_get_wtime();
-
-			total_time_s += end - start;
-			num = threads[k];
-			int cut_off = 0;
-			if (p < 5)
-			{
-				cut_off = pow(2, p);
-			}
-			else
-			{
-				cut_off = 1000;
-			}
-
-			omp_set_nested(1);
-			// omp_set_num_threads(2);
-			for (int i = 0; i < n; i++)
-			{
-				arr_Open_mp[i] = array[i];
-			}
-			start = omp_get_wtime();
-
-			omp_set_num_threads(num);
-#pragma omp parallel num_threads(num)
-			{
-				// int thread_id = omp_get_thread_num();
-				// printf("Thread ID: %d\n", thread_id);
-#pragma omp single
-				{
-					bitonicSort(arr_Open_mp, 0, n, 1, 0, cut_off);
-				}
-			}
-			end = omp_get_wtime();
-
-			total_time_p += end - start;
+			array[i] = rand() % size + 1;
+			arr_serial[i] = array[i];
+			arr_Open_mp[i] = arr_serial[i];
 		}
-		printf("This is the Bitonic Sort with %d number of threas in Openmp VS QuickSort\n", num);
-		double q_time = total_time_s / num_runs;
-		isSorted(arr_serial, n) ? printf("Sorted\n") : printf("Not Sorted\n");
-		printf("QuickSort Time taken: %f\n", q_time);
-		double b_time = total_time_p / num_runs;
-		isSorted(arr_Open_mp, n) ? printf("Sorted\n") : printf("Not Sorted\n");
-		printf("Average Bitonic Time taken: %f\n", b_time);
-		double Speedup = (q_time) / (b_time);
-		printf("Speedup: %f\n", Speedup);
-		total_time_p = 0.0;
-		total_time_s = 0.0;
+
+		for (int i = 0; i < n; i++)
+		{
+			arr_serial[i] = array[i];
+		}
+		start = omp_get_wtime();
+		quickSort(arr_serial, 0, n - 1);
+		end = omp_get_wtime();
+
+		total_time_s += end - start;
+		int cut_off = 0;
+		if (p < 5)
+		{
+			cut_off = pow(2, p);
+		}
+		else
+		{
+			cut_off = 1000;
+		}
+
+		omp_set_nested(1);
+		// omp_set_num_threads(2);
+		for (int i = 0; i < n; i++)
+		{
+			arr_Open_mp[i] = array[i];
+		}
+		start = omp_get_wtime();
+
+		omp_set_num_threads(num);
+#pragma omp parallel num_threads(num)
+		{
+			// int thread_id = omp_get_thread_num();
+			// printf("Thread ID: %d\n", thread_id);
+#pragma omp single
+			{
+				bitonicSort(arr_Open_mp, 0, n, 1, 0, cut_off);
+			}
+		}
+		end = omp_get_wtime();
+
+		total_time_p += end - start;
 	}
+	printf("This is the Bitonic Sort with %d number of threas in Openmp VS QuickSort\n", num);
+	double q_time = total_time_s / num_runs;
+	isSorted(arr_serial, n) ? printf("Sorted\n") : printf("Not Sorted\n");
+	printf("QuickSort Time taken: %f\n", q_time);
+	double b_time = total_time_p / num_runs;
+	isSorted(arr_Open_mp, n) ? printf("Sorted\n") : printf("Not Sorted\n");
+	printf("Average Bitonic Time taken: %f\n", b_time);
+	double Speedup = (q_time) / (b_time);
+	printf("Speedup: %f\n", Speedup);
 	free(arr_serial);
 	free(arr_Open_mp);
 	free(array);

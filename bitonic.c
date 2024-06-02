@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 		total_time_s += end - start;
 	}
 	double q_time = total_time_s / num_rows;
-	printf("Time taken by serial code: %f\n", q_time);
+	printf("Time taken by Bitonic Serial: %f\n", q_time);
 	free(arr_serial);
 	return 0;
 }

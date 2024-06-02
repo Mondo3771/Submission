@@ -13,7 +13,46 @@
 %\pagenumbering{roman}
 %\newpage
 \pagenumbering{arabic}
-\section* {Baseline Algorithm}
+\section{Bitonic Sort}
+
+\subsection*{Serial Pseudocode}
+This is the pseudocode for the bitonic sort algorithm in serial:\\
+\begin{figure}[ht]
+    \begin{algorithm2e}
+        \SetKwProg{Fn}{Function}{}{end}
+        \Fn{bitonicMerge(a[], low, cnt, dir)}{
+            \If{cnt > 1}{
+                k $\leftarrow$ cnt / 2\;
+                \For{i $\leftarrow$ low \KwTo low + k}{
+                    \If{dir == (a[i] > a[i + k])}{
+                        swap a[i] and a[i + k]\;
+                    }
+                }
+                bitonicMerge(a, low, k, dir)\;
+                bitonicMerge(a, low + k, k, dir)\;
+            }
+        }
+        \Fn{bitonicSort(a[], low, cnt, dir)}{
+            \If{cnt > 1}{
+                k $\leftarrow$ cnt / 2\;
+                bitonicSort(a, low, k, 1)\;
+                bitonicSort(a, low + k, k, 0)\;
+                bitonicMerge(a, low, cnt, dir)\;
+            }
+        }
+    \end{algorithm2e}
+    \caption{Bitonic Sort and Merge Algorithm in Serial}
+    \label{fig:bitonic}
+\end{figure}
+This is the basic idea of the bitonic sort algorithm. The bitonicMerge function
+is a recursive function that merges two arrays of size $n/2$ each. The
+bitonicSort function is also a recursive function that first sorts the first
+half of the array in ascending order and the second half in descending order.
+The bitonicMerge function is then called to merge the two halves.
+This is the serial implementation and the base of what i will be using to
+implement the parallel version of the bitonic sort algorithm.
+
+\section{Baseline Algorithm}
 I used Quicksort as the baseline algorithm for this assignment. Quicksort is a
 comparison sort and is a divide-and-conquer algorithm. It works by selecting a
 'pivot' element from the array and partitioning the other elements into two
@@ -24,44 +63,10 @@ partitioned into two sub-arrays. The quicksort function is then called
 recursively on the two sub-arrays.
 This is what i compare the time for my OPENMP and MPI implementations of the
 bitonic sort algorithm to.
-\section*{Bitonic Sort}
 
-\subsection*{Pseudocode}
-This is the pseudocode for the bitonic sort algorithm in serial:\\
-\begin{algorithm2e}
-    \SetKwProg{Fn}{Function}{}{end}
-    \Fn{bitonicMerge(a[], low, cnt, dir)}{
-        \If{cnt > 1}{
-            k $\leftarrow$ cnt / 2\;\\
-            \For{i $\leftarrow$ low \KwTo low + k}{
-                \If{dir == (a[i] > a[i + k])}{
-                    swap a[i] and a[i + k]\;
-                }
-            }
-            bitonicMerge(a, low, k, dir)\;\\
-            bitonicMerge(a, low + k, k, dir)\;
-        }
-    }
-    \Fn{bitonicSort(a[], low, cnt, dir)}{
-        \If{cnt > 1}{
-            k $\leftarrow$ cnt / 2\;
-            bitonicSort(a, low, k, 1)\;\\
-            bitonicSort(a, low + k, k, 0)\;\\
-            bitonicMerge(a, low, cnt, dir)\;\\
-        }
-    }
-\end{algorithm2e}
-This is the basic idea of the bitonic sort algorithm. The bitonicMerge function
-is a recursive function that merges two arrays of size $n/2$ each. The
-bitonicSort function is also a recursive function that first sorts the first
-half of the array in ascending order and the second half in descending order.
-The bitonicMerge function is then called to merge the two halves.
-This is the serial implementation and the base of what i will be using to
-implement the parallel version of the bitonic sort algorithm.
+\section{Parallel Implementation}
 
-\section*{Parallel Implementation}
-
-\subsection*{OPENMP Implementation}
+\subsection{OPENMP Implementation}
 Using the Bitonic Sort Serial as a base, I used the task construct to create
 task that could be run in parallel. Two task are created in the bitonicSort and
 theres a taskwait so that the task are completed before the bitonicMerge is
@@ -75,12 +80,66 @@ arrays.
 
 These are tehe Results of the OPENMP implementation on different number of
 threads on an array of size  $2^{24}$:
+\begin{table}[ht]z
+    \centering
+    \setlength{\tabcolsep}{10pt} % Add padding
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Threads} & \textbf{Speedup} & \textbf{Time Taken} \\
+        \hline
+        1                & 0.2570223        & 14.018849           \\
+        2                & 0.316548         & 11.382653           \\
+        4                & 0.496615         & 7.219549            \\
+        8                & 0.669296         & 5.419865            \\
+        16               & 0.775642         & 4.649495            \\
+        32               & 0.781515         & 4.599116            \\
+        \hline
+    \end{tabular}
+    \caption{Threads, Speedup and Time Taken}
+    \label{table:1}
+\end{table}\\
+As we can see from the table, the speedup increases as the number of threads
+increase but it platuas at 32 threads. This is because the number of threads is
+greater than the number of cores on the machine i was testing on. This causes
+the overhead of
+creating threads to be greater than the speedup gained from the parallel
+implementation. This is why the speedup is the relativly the same for 16
+threads and 32 threads.
+Therefore if i had to run the program on a machine with more cores would have
+achieved a higher speedup for 32 threads.
 
-% \begin{figure}[htbp]
-%     \centering
-%     \includegraphics[width=0.5\textwidth]{pics/openmpres.png}
-%     \caption{Results of the OPENMP implementation on different number of threads}
-%     \label{fig:openmp_results}
-% \end{figure}
+\subsection{MPI Implementation}
+The MPI implementation of the bitonic sort algorithm is a bit more complex than
+the OpenMP implementation. Initially, the program runs the baseline algorithm
+on process 0 for benchmarking. We then run the Bitonic Sort MPI, distributing
+the array among the processes. Each process runs the bitonic sort on its piece
+of the array. Depending on the rank and number of processors, I assign the
+direction accordingly. After this, I will have n/2(n is the number of
+processors) bitonic sequences that need
+to be sorted. I then let process 0 handle the merging of these sequences by
+calling my recursive bitonicMerge function.
 
+\begin{table}[ht]
+    \centering
+    \setlength{\tabcolsep}{10pt} % Add padding
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Number of Processes} & \textbf{Speedup MPI} & \textbf{Time
+            Taken MPI}
+        \\
+        \hline
+        1                            & 0.191474             & 15.646154
+        \\
+        2                            & 0.302780             & 10.351526
+        \\
+        4                            & 0.417547             & 8.764265
+        \\
+        \hline
+    \end{tabular}
+    \caption{Number of Processes, Speedup MPI, and Time Taken MPI}
+    \label{table:2}
+\end{table}
+\section{Correctness and Performance Analysis}
+
+\section{Conclusion}
 \end{document}
