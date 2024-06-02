@@ -112,8 +112,13 @@ void bitonicSort_Seq(int a[], int low, int cnt, bool dir)
 
 void recursiveBitonic(int a[], int low, int cnt, int s, int dir)
 {
+
     if (s > 1)
     {
+        int *recv = (int *)malloc(2 * cnt / s * sizeof(int));
+        MPI_Scatter(a, cnt / s, MPI_INT, recv, cnt / s, MPI_INT, 0, MPI_COMM_WORLD);
+        bitonicMerge_Seq(recv, 0, cnt / s, dir);
+        MPI_Gather(recv, cnt / s, MPI_INT, a, cnt / s, MPI_INT, 0, MPI_COMM_WORLD);
         int half = cnt / 2;
         int half_s = s / 2;
         recursiveBitonic(a, low, half, half_s, 1);
