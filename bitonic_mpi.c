@@ -139,14 +139,12 @@ void bitonicSort(int a[], int low, int cnt, bool dir, int rank, int s)
     MPI_Gather(recv, cnt / s, MPI_INT, a, cnt / s, MPI_INT, 0, MPI_COMM_WORLD);
     if (rank == 0)
     {
-        // this is for 8 processors
         recursiveBitonic(a, 0, cnt, s, dir);
     }
 }
 
 int main(int argc, char *argv[])
 {
-
     MPI_Init(&argc, &argv);
     int rank;
     int s;
@@ -179,13 +177,6 @@ int main(int argc, char *argv[])
             arr_serial[i] = array[i];
             arr_MPI[i] = array[i];
         }
-
-        // printf("Array to be SOrted\n");
-        // for (int i = 0; i < size; i++)
-        // {
-        //     printf("%d ", array[i]);
-        // }
-        // printf("\n");
         double start, end;
         start = MPI_Wtime();
         quickSort(arr_serial, 0, n);
