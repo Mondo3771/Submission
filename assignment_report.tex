@@ -80,7 +80,7 @@ arrays.
 
 These are tehe Results of the OPENMP implementation on different number of
 threads on an array of size  $2^{24}$:
-\begin{table}[ht]z
+\begin{table}[ht]
     \centering
     \setlength{\tabcolsep}{10pt} % Add padding
     \begin{tabular}{|c|c|c|}
@@ -142,23 +142,30 @@ calling my recursive bitonicMerge function.
 \section{Correctness and Performance Analysis}
 For Correctness I just checked if the array was sorted in ascending order using the IsSorted function i made.
 Below is a Table of the time taken for the baseline algorithm, Bitonic Sort in Serial and the parallel implementations: Note that the baseline is run in each of the parallel implementations to get a fair comparison.Therefore Quicksort sorts the same array as the parallel implementation and that i will be runnig OpenMP with 16 threads and MPI with 4 processes.
-\begin{table}[ht]
+\begin{table}[h]
     \centering
-    \setlength{\tabcolsep}{10pt} % Add padding
-    \begin{tabular}{|c|c|c|c|}
+    \small
+    \begin{tabular}{|c|c|c|c|c|c|c|}
         \hline
-        \textbf{Algorithm} & \textbf{Time Taken} & \textbf{Speedup} & \textbf{Correctness} \\
+        \textbf{Size ($2^n$)} & \textbf{Bitonic Serial Time} & \textbf{QuickSort Time} & \textbf{Bitonic OpenMP Time} & \textbf{OpenMP Speedup} & \textbf{Bitonic MPI Time} & \textbf{MPI Speedup} \\
         \hline
-        Baseline            & 15.646154          & 1.0             & True                 \\
-        Bitonic Sort Serial & 14.018849          & 1.116            & True                 \\
-        Bitonic Sort OPENMP & 4.599116           & 3.405            & True                 \\
-        Bitonic Sort MPI    & 8.764265           & 1.785            & True                 \\
+        10 & 0.001626 & 0.000601 & 0.003077 & 0.195289 & 0.004364 & 0.123490 \\
+        12 & 0.006519 & 0.002495 & 0.004260 & 0.585759 & 0.005999 & 0.452334 \\
+        14 & 0.027727 & 0.006634 & 0.007855 & 0.844590 & 0.028486 & 0.426637 \\
+        16 & 0.051274 & 0.015201 & 0.018460 & 0.823429 & 0.107221 & 0.405564 \\
+        18 & 0.158934 & 0.057405 & 0.063904 & 0.898293 & 0.112836 & 0.335153 \\
+        20 & 0.666243 & 0.204221 & 0.216014 & 0.945408 & 0.385627 & 0.679878 \\
+        22 & 3.025937 & 0.837932 & 1.013498 & 0.826772 & 1.724959 & 0.433854 \\
+        24 & 13.860130 & 3.595785 & 4.674581 & 0.769221 & 7.939528 & 0.408979 \\
+        26 & 63.051318 & 15.609176 & 21.517336 & 0.725423 & 35.775854 & 0.389256 \\
         \hline
     \end{tabular}
-    \caption{Time Taken, Speedup and Correctness}
-    \label{table:3} 
+    \caption{Time Taken and Speedup for Different Sort Algorithms}
+    \label{table:sort_results}
 \end{table}
 
 
 \section{Conclusion}
+Despite implementing the parallel versions of the bitonic sort algorithm, they still perform slower on my machine. This is likely due to the limited number of processors available. However, it's important to note that the bitonic sort algorithm has a time complexity of $O( n log^2( n))$, which is less superior to quicksort's average time complexity of $O(n log n)$. Therefore, I believe that with more processors, the speedup of the parallel bitonic sort would be significant. Because the the Time Complexity would be $O(n/p * log^2 (n))$
+where p is the number of processors or threads. Even thou this would increase the overhead of creating threads or processes, the speedup would be greater than the overhead. Therefore, the parallel bitonic sort algorithm is a viable alternative to quicksort for large arrays with a large number of processors.  
 \end{document}
