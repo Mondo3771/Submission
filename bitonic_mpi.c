@@ -146,10 +146,6 @@ void bitonicSort(int a[], int low, int cnt, bool dir, int rank, int s)
 
 int main(int argc, char *argv[])
 {
-    // int num_runs = atoi(argv[2]);
-    // for (int k = 0; k < num_runs; k++)
-    // {
-
         MPI_Init(&argc, &argv);
         int rank;
         int s;
@@ -204,7 +200,6 @@ int main(int argc, char *argv[])
             free(array);
         }
         MPI_Finalize();
-    // }
 
     return 0;
 }
