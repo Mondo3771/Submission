@@ -13,7 +13,32 @@
 %\pagenumbering{roman}
 %\newpage
 \pagenumbering{arabic} 
-
+\section*{Bitonic Sort}
+\subsection*{Pseudocode}
+\begin{algorithm2e}
+\SetKwProg{Fn}{Function}{}{end}
+\Fn{bitonicMerge(a[], low, cnt, dir)}{
+    \If{cnt > 1}{
+        k $\leftarrow$ cnt / 2\;\\
+        \For{i $\leftarrow$ low \KwTo low + k}{
+            \If{dir == (a[i] > a[i + k])}{
+                swap a[i] and a[i + k]\;
+            }
+        }
+        bitonicMerge(a, low, k, dir)\;\\
+        bitonicMerge(a, low + k, k, dir)\;
+    }
+}
+\Fn{bitonicSort(a[], low, cnt, dir)}{
+    \If{cnt > 1}{
+        k $\leftarrow$ cnt / 2\;
+        bitonicSort(a, low, k, 1)\;\\
+        bitonicSort(a, low + k, k, 0)\;\\
+        bitonicMerge(a, low, cnt, dir)\;\\
+    }
+}
+\end{algorithm2e}
+This i
 
 
 \end{document} 
